@@ -24,6 +24,12 @@ function updatecart(pizza) {
       timeout: 1000,
       text: "Item added to cart"
     }).show();
+  })["catch"](function (err) {
+    new (noty__WEBPACK_IMPORTED_MODULE_0___default())({
+      type: 'error',
+      timeout: 1000,
+      text: "Something went wrong"
+    }).show();
   });
 }
 addToCart.forEach(function (btn) {

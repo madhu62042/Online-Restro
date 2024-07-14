@@ -5,11 +5,11 @@ const path = require ('path');
 const ejs = require('ejs')
 const expressLayouts = require('express-ejs-layouts')
 const mongoose = require('mongoose')
-const PORT = process.env.PORT || 6026
+const PORT = process.env.PORT || 6027
 const session = require('express-session')
 const flash = require('express-flash');
-const { collection } = require('./app/models/menu');
 const MongoStore= require('connect-mongo')
+const passport = require('passport')
 
 
 //Database connection
@@ -22,6 +22,11 @@ connection.once('open', ()=>{
 }).on('error',(err)=>{
     console.log('connection failed:',err)
 })
+
+//passport config
+const passportInit = require('./app/config/passport')
+passportInit(passport)
+
  
 //session store
 const mongoStore = MongoStore.create({
@@ -38,7 +43,12 @@ app.use(session({
     store: mongoStore,
     cookie: {maxAge:1000 * 60 * 60 * 24}
 }))
+//session config and passport
 
+app.use(passport.initialize())
+app.use(passport.session())
+
+//flash
 app.use(flash())
 
 
@@ -46,11 +56,15 @@ app.use(flash())
 
 //Assets
 app.use(express.static('public'))
+app.use(express.urlencoded({extended : false}))
 app.use(express.json())
 
 //set global middleware
 app.use((req,res,next)=>{
- res.locals.session = req.session
+    res.locals.session = req.session
+    res.locals.user = req.user
+    
+
  next()
 })
 // set Template engine
