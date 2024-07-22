@@ -23,9 +23,7 @@ connection.once('open', ()=>{
     console.log('connection failed:',err)
 })
 
-//passport config
-const passportInit = require('./app/config/passport')
-passportInit(passport)
+
 
  
 //session store
@@ -45,8 +43,12 @@ app.use(session({
 }))
 //session config and passport
 
+//passport config
+const passportInit = require('./app/config/passport')
+passportInit(passport)
 app.use(passport.initialize())
 app.use(passport.session())
+
 
 //flash
 app.use(flash())
