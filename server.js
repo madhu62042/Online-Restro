@@ -5,11 +5,12 @@ const path = require ('path');
 const ejs = require('ejs')
 const expressLayouts = require('express-ejs-layouts')
 const mongoose = require('mongoose')
-const PORT = process.env.PORT || 6027
+const PORT = process.env.PORT || 6028
 const session = require('express-session')
 const flash = require('express-flash');
 const MongoStore= require('connect-mongo')
 const passport = require('passport')
+const Emitter = require('events')
 
 
 //Database connection
@@ -23,8 +24,10 @@ connection.once('open', ()=>{
     console.log('connection failed:',err)
 })
 
+//Event Emitter
 
-
+const eventEmitter = new Emitter()
+app.set('eventEmitter',eventEmitter)
  
 //session store
 const mongoStore = MongoStore.create({
@@ -44,7 +47,8 @@ app.use(session({
 //session config and passport
 
 //passport config
-const passportInit = require('./app/config/passport')
+const passportInit = require('./app/config/passport');
+const order = require('./app/models/order');
 passportInit(passport)
 app.use(passport.initialize())
 app.use(passport.session())
@@ -80,6 +84,25 @@ require('./routes/web')(app)
 
 
 
-app.listen(PORT,()=>{
+ const server = app.listen(PORT,()=>{
     console.log(`server listen on port ${PORT}`)
+})
+
+//Socket
+const io = require('socket.io')(server)
+io.on('connection',(socket)=>{
+    //join
+    console.log(socket.id)
+    socket.on('join',(orderId)=>{
+        console.log(orderId)
+      socket.join(orderId)
+    })
+})
+
+eventEmitter.on('orderUpdated',(data)=>{
+    io.to(`order_${data.id}`).emit('orderUpdated',data)
+})
+
+eventEmitter.on('orderPlaced',(data)=>{
+     io.to('adminRoom').emit('orderPlaced',data)
 })
