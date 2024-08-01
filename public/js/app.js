@@ -144,7 +144,6 @@ updateStatus(order);
 //socket
 
 var socket = io();
-(0,_admin_js__WEBPACK_IMPORTED_MODULE_1__["default"])(socket);
 
 //join
 
@@ -154,6 +153,7 @@ if (order) {
 var adminAreaPath = window.location.pathname;
 console.log(adminAreaPath);
 if (adminAreaPath.includes('admin')) {
+  (0,_admin_js__WEBPACK_IMPORTED_MODULE_1__["default"])(socket);
   socket.emit('join', 'adminRoom');
 }
 socket.on('orderUpdated', function (data) {
